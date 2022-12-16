@@ -1,0 +1,1 @@
+Vanilla script for testing user exit support.
