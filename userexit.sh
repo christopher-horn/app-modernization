@@ -25,7 +25,7 @@ export LABGROUP=lab$(awk '/^tz_workshop_lab_set/ {print $2; exit 0}' ./ansible_h
 [[ -z $LABGROUP ]] && echo "Error: Missing lab set" && exit 1
 echo "Preparing lab set $LABGROUP"
 
-export RAMDOMSEED=$(awk '/tz_randomseed/ {print $2; exit 0}' ./ansible_hostvars.yaml)
+export RAMDOMSEED=$(awk '/tz_random_seed/ {print $2; exit 0}' ./ansible_hostvars.yaml)
 [[ -z $RAMDOMSEED ]] && echo "Error: Missing randomseed" && exit 1
 export HEADERS=$(echo $RAMDOMSEED | base64 -d |sed 's/9/:/')
 [[ $? != 0 ]] && echo "Error: Problem extracting header" && exit 1
