@@ -18,6 +18,7 @@ fi
 
 exec 1> /tmp/lab_setup.stdout
 exec 2> /tmp/lab_setup.stderr
+set -x
 
 [[ ! -f ./ansible_hostvars.yaml ]] && echo "Error: Missing Ansible Hostvars" && exit 1
 
@@ -97,12 +98,14 @@ fi
 # then cloned under certusr and configured there...
 ##############################################################################
 if [[ ! -d ~root/acmecert ]] ; then
+    cd ~root
     git clone https://github.com/DanielCasali/acmecert.git
     if [[ $? != 0 ]] ; then
         echo "Error: Problem cloning https://github.com/DanielCasali/acmecert.git"
         rm -rf ~root/acmecert
         exit 1
     fi
+    cd -
 fi
 
 ##############################################################################
@@ -148,7 +151,7 @@ if [[ ! -f /tmp/acme-setup.complete ]] ; then
     curl -X PUT -H "$HEADERS" -H "Content-Type: application/json" -d '[ { "data": "'$TXTENTRY'", "name": "subdomainName", "port": 65535, "priority": 10, "protocol": "string", "service": "string", "ttl": 600, "type": "TXT" } ]' "https://api.godaddy.com/v1/domains/$MAINDOMAIN/records/TXT/_acme-challenge.$LABGROUP"
     [[ $? != 0 ]] && echo "Error: Problem adding challenge response text to DNS" && exit 1
 
-    sleep 20
+    sleep 30
     su - certusr -c "cd /home/certusr/acmecert ; /home/certusr/acmecert/acme.sh --renew -d *.$LABGROUP.$MAINDOMAIN  --yes-I-know-dns-manual-mode-enough-go-ahead-please"
     [[ $? != 0 ]] && echo "Error: Problem completing challenge" && exit 1
 
@@ -254,6 +257,6 @@ fi
 ##############################################################################
 date +"%Y/%m/%d %H:%M:%S setup completed" > /tmp/lab_setup.complete
 
-rm -f ./ansible_hostvars.yaml ./ansible_hostvars.json
-rm -f /tmp/lab_setup.stdout /tmp/lab_setup.stderr
+#rm -f ./ansible_hostvars.yaml ./ansible_hostvars.json
+#rm -f /tmp/lab_setup.stdout /tmp/lab_setup.stderr
 exit 0
