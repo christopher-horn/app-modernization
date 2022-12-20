@@ -84,6 +84,7 @@ fi
 ##############################################################################
 if [[ ! -f /tmp/scale-setup.complete ]] ; then
     echo "Adjusting Scale config"
+    export PATH=$PATH:/usr/lpp/mmfs/bin
     mmchconfig pagepool=256M -i
     [[ $? != 0 ]] && echo "Error: Problem changing Scale pagepool" && exit 1
     mmshutdown --accept
