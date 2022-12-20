@@ -66,14 +66,14 @@ frontend ingress-https-vanity
     bind $VIRTUALIP:443
     default_backend ingress-https-vanity
     option tcplog
-​
+
 backend ingress-https-vanity
     balance source
     server https-router1 $MASTERIP:32443 check" >> /etc/haproxy/haproxy.cfg
     fi
     systemctl restart haproxy
     [[ $? != 0 ]] && echo "Error: Problem restarting haproxy" && exit 1
-​else
+else
     export INITIALIP=$(ip a sh |grep "global noprefixroute env32"|awk '{print $2}' |cut -d/ -f1|head -1)
     export VIRTUALIP=$(ip a sh |grep "global noprefixroute env32"|awk '{print $2}' |cut -d/ -f1|head -2)
 fi
@@ -139,11 +139,11 @@ if [[ ! -f /tmp/acme-setup.complete ]] ; then
     [[ $? != 0 ]] && echo "Error: Problem installing acme.sh" && exit 1
 
     su - certusr -c " cd /home/certusr/acmecert ; /home/certusr/acmecert/acme.sh --set-default-ca --server letsencrypt"
-    ​[[ $? != 0 ]] && echo "Error: Problem setting default ca for acme.sh" && exit 1
+    [[ $? != 0 ]] && echo "Error: Problem setting default ca for acme.sh" && exit 1
 
     export TXTENTRY=$(su - certusr -c "/home/certusr/acmecert/acme.sh --issue  --dns  -d *.$LABGROUP.$MAINDOMAIN  --yes-I-know-dns-manual-mode-enough-go-ahead-please 2>&1 "|grep 'value:' |awk '{print $NF}'|tr -d \')
     [[ -z $TXTENTRY ]] && echo "Error: Problem obaining challenge text entry" && exit 1
-​
+
     echo "Adding $TXTENTRY to DNS for challenge response"
     curl -X PUT -H "$HEADERS" -H "Content-Type: application/json" -d '[ { "data": "'$TXTENTRY'", "name": "subdomainName", "port": 65535, "priority": 10, "protocol": "string", "service": "string", "ttl": 600, "type": "TXT" } ]' "https://api.godaddy.com/v1/domains/$MAINDOMAIN/records/TXT/_acme-challenge.$LABGROUP"
     [[ $? != 0 ]] && echo "Error: Problem adding challenge response text to DNS" && exit 1
@@ -152,7 +152,7 @@ if [[ ! -f /tmp/acme-setup.complete ]] ; then
     su - certusr -c "cd /home/certusr/acmecert ; /home/certusr/acmecert/acme.sh --renew -d *.$LABGROUP.$MAINDOMAIN  --yes-I-know-dns-manual-mode-enough-go-ahead-please"
     [[ $? != 0 ]] && echo "Error: Problem completing challenge" && exit 1
 
-    ​mkdir /home/cecuser/certs
+    mkdir /home/cecuser/certs
     cp /home/certusr/.acme.sh/*.$LABGROUP.$MAINDOMAIN/fullchain.cer /home/cecuser/certs/fullchain.cer
     [[ $? != 0 ]] && echo "Error: Problem copying fullchain.cer to cecuser certs" && exit 1
     cp /home/certusr/.acme.sh/*.$LABGROUP.$MAINDOMAIN/*.$LABGROUP.$MAINDOMAIN.key /home/cecuser/certs/fullchainkey.key
